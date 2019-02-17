@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/jainpank/app-test-jx-github-v1:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/jainpank/app-test-jx-github-v1:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: app-test-jx-github-v1
+        chartPath: charts/app-test-jx-github-v1
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/jainpank/app-test-jx-github-v1'
+          image.tag: '{{.DIGEST_HEX}}'
